@@ -391,8 +391,14 @@ impl OnnxGraph {
     }
 
     fn div_conversion(node: Node) -> BinaryNode {
+        log::info!("node: {:?}", node.inputs);
+
         let lhs = node.inputs.first().unwrap().to_type();
         let rhs = node.inputs.get(1).unwrap().to_type();
+
+        log::info!("lhs: {:?}", lhs);
+        log::info!("rhs: {:?}", rhs);
+
         let output = node.outputs.first().unwrap().to_type();
 
         BinaryNode::div(lhs, rhs, output)
