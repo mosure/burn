@@ -73,10 +73,23 @@ impl Type {
 impl ScalarType {
     pub fn new<S: AsRef<str>>(name: S, kind: ScalarKind) -> Self {
         if name.as_ref().is_empty() {
-            panic!("Scalar of Type {:?} was passed with empty name", kind);
+            // panic!("Scalar of Type {:?} was passed with empty name", kind);
         }
+
+        let name = if name.as_ref().is_empty() {
+            match kind {
+                ScalarKind::Int32 => "unnamed_i32",
+                ScalarKind::Int64 => "unnamed_i64",
+                ScalarKind::Float32 => "unnamed_f32",
+                ScalarKind::Float64 => "unnamed_f64",
+                ScalarKind::Bool => "unnamed_bool",
+            }
+        } else {
+            name.as_ref()
+        };
+
         Self {
-            name: Ident::new(name.as_ref(), Span::call_site()),
+            name: Ident::new(name, Span::call_site()),
             kind,
         }
     }
@@ -99,13 +112,24 @@ impl TensorType {
         shape: Option<Vec<usize>>,
     ) -> Self {
         if name.as_ref().is_empty() {
-            panic!(
-                "Tensor of Kind {:?} with dim shape {:?} was passed with empty name",
-                kind, shape
-            );
+            // panic!(
+            //     "Tensor of Kind {:?} with dim shape {:?} was passed with empty name",
+            //     kind, shape
+            // );
         }
+
+        let name = if name.as_ref().is_empty() {
+            match kind {
+                TensorKind::Int => "unnamed_int",
+                TensorKind::Float => "unnamed_float",
+                TensorKind::Bool => "unnamed_bool",
+            }
+        } else {
+            name.as_ref()
+        };
+
         Self {
-            name: Ident::new(name.as_ref(), Span::call_site()),
+            name: Ident::new(name, Span::call_site()),
             dim,
             kind,
             shape,
