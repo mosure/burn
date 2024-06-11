@@ -787,11 +787,8 @@ fn gather_update_outputs(node: &mut Node) {
         panic!("Gather: indices tensor rank above 1 not supported, found {:?}", indices_tensor.dim);
     }
 
-    // Output of rank q+(r-1), where q is rank of indices tensor and r is rank of input
-    let output_rank = indices_tensor.dim + input_tensor.dim - 1;
-
     node.outputs[0].ty = ArgType::Tensor(TensorType {
-        dim: output_rank,
+        dim: input_tensor.dim,
         shape: None,
         elem_type: input_tensor.elem_type.clone(),
     });
