@@ -104,7 +104,9 @@ impl TensorType {
                 kind, shape
             );
         }
-        let name = name.as_ref().replace("/", "_");
+        let name = name.as_ref()
+            .replace("/", "_")
+            .replace(":", "_");
         Self {
             name: Ident::new(name.as_ref(), Span::call_site()),
             dim,
