@@ -54,6 +54,10 @@ pub struct GraphData {
     input_key_map: HashMap<String, String>,
 }
 
+fn sanitize_ident_name(name: &str) -> String {
+    name.replace("/", "_").replace(":", "_").replace(".", "_")
+}
+
 impl GraphData {
     pub(crate) fn new(
         inputs: &Vec<ValueInfoProto>,
@@ -65,7 +69,7 @@ impl GraphData {
 
         let constants = initializers
             .iter()
-            .map(|x| (x.name.clone(), Argument::from_initializer(x)))
+            .map(|x| (sanitize_ident_name(&x.name), Argument::from_initializer(x)))
             .collect::<HashMap<String, Argument>>();
         let outputs = outputs
             .iter()
@@ -77,13 +81,15 @@ impl GraphData {
             .map(|(i, x)| {
                 let in_name = format!("input{}", i + 1);
 
-                input_name_map.insert(x.name.clone(), IOEntry::In(i));
-                input_key_map.insert(in_name.clone(), x.name.clone());
+                let name = sanitize_ident_name(&x.name);
+
+                input_name_map.insert(name.clone(), IOEntry::In(i));
+                input_key_map.insert(in_name.clone(), name.clone());
 
                 let mut arg = Argument::try_from(x.clone()).unwrap();
-                if let Some(initial_arg) = constants.get(&x.name) {
+                if let Some(initial_arg) = constants.get(&name) {
                     if arg.value.is_none() {
-                        log::warn!("Input {} is also an initializer. Initializer as default values are currently not supported", x.name);
+                        log::warn!("Input {} is also an initializer. Initializer as default values are currently not supported", name);
                         arg.copy_value(initial_arg);
                     }
                 }
