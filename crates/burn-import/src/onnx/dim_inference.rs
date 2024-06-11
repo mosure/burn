@@ -297,14 +297,10 @@ fn resize_update_outputs(node: &mut Node) {
         _ => panic!("Resize: invalid output type"),
     };
 
-    let output_size = match &node.inputs[3].ty {
+    let _output_size = match &node.inputs[3].ty {
         ArgType::Tensor(output_size) => output_size.clone(),
         _ => panic!("Resize: invalid output_size type"),
     };
-
-    if output_size.dim != 1 {
-        panic!("Resize: output_size must be 1D, found {:?}", output_size.dim);
-    }
 
     node.outputs[0].ty = ArgType::Tensor(TensorType {
         dim: input.dim,
