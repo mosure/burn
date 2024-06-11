@@ -161,7 +161,7 @@ impl GraphData {
                 output.name.clone(),
                 IOEntry::Node(self.processed_nodes.len(), 0),
             );
-            output.name = format!("{}_out{}", node.name, out_count);
+            output.name = format!("{}_out{}", sanitize_ident_name(&node.name), out_count);
             out_count += 1;
         }
         self.processed_nodes.push(node);
