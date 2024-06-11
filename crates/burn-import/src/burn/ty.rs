@@ -158,6 +158,7 @@ impl OtherType {
                 tokens
             );
         }
+        let name = sanitize_ident_name(name.as_ref());
         Self {
             name: Ident::new(name.as_ref(), Span::call_site()),
             ty: tokens,
