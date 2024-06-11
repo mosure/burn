@@ -171,5 +171,5 @@ impl OtherType {
 
 
 fn sanitize_ident_name(name: &str) -> String {
-    name.replace("/", "_").replace(":", "_")
+    name.replace("/", "_").replace(":", "_").replace(".", "_")
 }
