@@ -134,6 +134,8 @@ impl Default for ArgType {
 
 impl Argument {
     pub fn new(name: String) -> Self {
+        let name = sanitize_ident_name(&name);
+
         Self {
             name,
             ty: ArgType::default(),
