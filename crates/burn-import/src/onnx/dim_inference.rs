@@ -784,7 +784,7 @@ fn gather_update_outputs(node: &mut Node) {
     };
 
     if indices_tensor.dim != 1 {
-        panic!("Gather: indices tensor rank above 1 not supported")
+        panic!("Gather: indices tensor rank above 1 not supported, found {:?}", indices_tensor.dim);
     }
 
     // Output of rank q+(r-1), where q is rank of indices tensor and r is rank of input
