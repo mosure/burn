@@ -110,18 +110,20 @@ impl GraphData {
 
     /// Get the value of an input from the original input name. Used during proto conversion
     pub(crate) fn init_in(&self, proto_str: &str) -> Argument {
-        match self.input_name_map.get(proto_str) {
+        let name = sanitize_ident_name(proto_str);
+
+        match self.input_name_map.get(&name) {
             None => {
                 //NOTE: if initializers are guaranteed to be unique, (I think they are
                 //need to confirm) then we could pop the initializer from the map
-                if let Some(init_arg) = self.initializers.get(proto_str) {
+                if let Some(init_arg) = self.initializers.get(&name) {
                     init_arg.clone()
                 } else {
                     log::warn!(
                         "Input {} not found, should only happen when peeking",
                         proto_str
                     );
-                    Argument::new(proto_str.to_string())
+                    Argument::new(name)
                 }
             }
             Some(IOEntry::In(i)) => self.inputs[*i].clone(),
