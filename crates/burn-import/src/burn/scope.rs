@@ -16,6 +16,10 @@ struct TensorVariable {
     node_position: usize,
 }
 
+fn sanitize_ident_name(name: &str) -> String {
+    name.replace("/", "_").replace(":", "_").replace(".", "_")
+}
+
 impl Scope {
     /// Declare a new tensor variable.
     pub fn tensor_register_variable(&mut self, tensor: &TensorType, node_position: usize) {
@@ -50,6 +54,7 @@ impl Scope {
                 }
             }
         } else {
+            println!("variables: {:?}", self.variables);
             panic!("No variable with name {}", tensor.name);
         }
     }
