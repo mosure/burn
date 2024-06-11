@@ -25,6 +25,10 @@ pub struct Argument {
     pub passed: bool,
 }
 
+fn sanitize_ident_name(name: &str) -> String {
+    name.replace("/", "_").replace(":", "_").replace(".", "_")
+}
+
 impl Argument {
     /// Copy everything except the name from the other argument
     pub fn copy_value(&mut self, other_arg: &Argument) {
@@ -34,6 +38,8 @@ impl Argument {
 
     pub fn from_initializer(initializer: &TensorProto) -> Argument {
         let name = initializer.name.clone();
+        let name = sanitize_ident_name(&name);
+
         let tensor = Tensor::try_from(initializer.clone())
             .unwrap_or_else(|_| panic!("invalid tensor {}", &initializer.name));
 
