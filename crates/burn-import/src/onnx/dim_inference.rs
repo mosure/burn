@@ -303,7 +303,7 @@ fn resize_update_outputs(node: &mut Node) {
     };
 
     if output_size.dim != 1 {
-        panic!("Resize: output_size must be 1D");
+        panic!("Resize: output_size must be 1D, found {:?}", output_size.dim);
     }
 
     node.outputs[0].ty = ArgType::Tensor(TensorType {
