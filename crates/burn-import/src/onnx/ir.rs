@@ -37,22 +37,22 @@ impl Argument {
         let tensor = Tensor::try_from(initializer.clone())
             .unwrap_or_else(|_| panic!("invalid tensor {}", &initializer.name));
 
-        if tensor.dim == 0 {
-            // Convert zero dim tensor to scalar
-            let value = if tensor.data.is_some() {
-                Some(tensor.data.clone().unwrap().into_scalar())
-            } else {
-                None
-            };
-            let ty = ArgType::Scalar(tensor.elem_type);
+        // if tensor.dim == 0 {
+        //     // Convert zero dim tensor to scalar
+        //     let value = if tensor.data.is_some() {
+        //         Some(tensor.data.clone().unwrap().into_scalar())
+        //     } else {
+        //         None
+        //     };
+        //     let ty = ArgType::Scalar(tensor.elem_type);
 
-            Self {
-                name,
-                ty,
-                value,
-                passed: false,
-            }
-        } else {
+        //     Self {
+        //         name,
+        //         ty,
+        //         value,
+        //         passed: false,
+        //     }
+        // } else {
             Self {
                 name,
                 ty: ArgType::Tensor(TensorType {
@@ -63,7 +63,7 @@ impl Argument {
                 value: tensor.data.clone(),
                 passed: false,
             }
-        }
+        // }
     }
 }
 
