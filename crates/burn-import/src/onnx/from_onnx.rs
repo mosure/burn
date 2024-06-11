@@ -54,10 +54,6 @@ pub struct GraphData {
     input_key_map: HashMap<String, String>,
 }
 
-fn sanitize_ident_name(name: &str) -> String {
-    name.replace("/", "_").replace(":", "_").replace(".", "_")
-}
-
 impl GraphData {
     pub(crate) fn new(
         inputs: &Vec<ValueInfoProto>,
@@ -69,7 +65,7 @@ impl GraphData {
 
         let constants = initializers
             .iter()
-            .map(|x| (sanitize_ident_name(&x.name), Argument::from_initializer(x)))
+            .map(|x| (x.name.clone(), Argument::from_initializer(x)))
             .collect::<HashMap<String, Argument>>();
         let outputs = outputs
             .iter()
@@ -81,13 +77,11 @@ impl GraphData {
             .map(|(i, x)| {
                 let in_name = format!("input{}", i + 1);
 
-                let name = sanitize_ident_name(&x.name);
-
-                input_name_map.insert(name.clone(), IOEntry::In(i));
-                input_key_map.insert(in_name.clone(), name.clone());
+                input_name_map.insert(x.name.clone(), IOEntry::In(i));
+                input_key_map.insert(in_name.clone(), x.name.clone());
 
                 let mut arg = Argument::try_from(x.clone()).unwrap();
-                if let Some(initial_arg) = constants.get(&name) {
+                if let Some(initial_arg) = constants.get(&x.name) {
                     if arg.value.is_none() {
                         log::warn!("Input {} is also an initializer. Initializer as default values are currently not supported", name);
                         arg.copy_value(initial_arg);
@@ -110,20 +104,18 @@ impl GraphData {
 
     /// Get the value of an input from the original input name. Used during proto conversion
     pub(crate) fn init_in(&self, proto_str: &str) -> Argument {
-        let name = sanitize_ident_name(proto_str);
-
-        match self.input_name_map.get(&name) {
+        match self.input_name_map.get(proto_str) {
             None => {
                 //NOTE: if initializers are guaranteed to be unique, (I think they are
                 //need to confirm) then we could pop the initializer from the map
-                if let Some(init_arg) = self.initializers.get(&name) {
+                if let Some(init_arg) = self.initializers.get(proto_str) {
                     init_arg.clone()
                 } else {
                     log::warn!(
                         "Input {} not found, should only happen when peeking",
                         proto_str
                     );
-                    Argument::new(name)
+                    Argument::new(proto_str.to_string())
                 }
             }
             Some(IOEntry::In(i)) => self.inputs[*i].clone(),
@@ -161,7 +153,7 @@ impl GraphData {
                 output.name.clone(),
                 IOEntry::Node(self.processed_nodes.len(), 0),
             );
-            output.name = format!("{}_out{}", sanitize_ident_name(&node.name), out_count);
+            output.name = format!("{}_out{}", &node.name, out_count);
             out_count += 1;
         }
         self.processed_nodes.push(node);

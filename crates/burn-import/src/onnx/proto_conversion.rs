@@ -218,17 +218,11 @@ fn convert_shape(shape: Vec<i64>) -> Vec<usize> {
     shape.iter().map(|s| *s as usize).collect()
 }
 
-fn sanitize_ident_name(name: &str) -> String {
-    name.replace("/", "_").replace(":", "_").replace(".", "_")
-}
-
 impl TryFrom<ValueInfoProto> for Argument {
     type Error = ParseError;
 
     fn try_from(value: ValueInfoProto) -> Result<Argument, Self::Error> {
         let name = value.name.clone();
-        let name = sanitize_ident_name(&name);
-
         let proto_type = value.type_.unwrap();
 
         if !proto_type.has_tensor_type() {

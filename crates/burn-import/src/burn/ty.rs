@@ -75,7 +75,6 @@ impl ScalarType {
         if name.as_ref().is_empty() {
             panic!("Scalar of Type {:?} was passed with empty name", kind);
         }
-        let name = sanitize_ident_name(name.as_ref());
         Self {
             name: Ident::new(name.as_ref(), Span::call_site()),
             kind,
@@ -105,7 +104,6 @@ impl TensorType {
                 kind, shape
             );
         }
-        let name = sanitize_ident_name(name.as_ref());
         Self {
             name: Ident::new(name.as_ref(), Span::call_site()),
             dim,
@@ -158,7 +156,6 @@ impl OtherType {
                 tokens
             );
         }
-        let name = sanitize_ident_name(name.as_ref());
         Self {
             name: Ident::new(name.as_ref(), Span::call_site()),
             ty: tokens,
@@ -167,9 +164,4 @@ impl OtherType {
     pub fn ty(&self) -> TokenStream {
         self.ty.clone()
     }
-}
-
-
-fn sanitize_ident_name(name: &str) -> String {
-    name.replace("/", "_").replace(":", "_").replace(".", "_")
 }
