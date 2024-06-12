@@ -92,18 +92,18 @@ impl<PS: PrecisionSettings> NodeCodegen<PS> for ResizeNode {
 
     fn forward(&self, scope: &mut Scope, node_position: usize) -> TokenStream {
         let input = scope.tensor_use_owned(&self.input, node_position);
-        // let output_size = scope.tensor_use_owned(&self.output_size, node_position);
+        let output_size = scope.tensor_use_owned(&self.output_size, node_position);
         let output = &self.output.name;
 
         let field = &self.field.name;
 
         quote! {
-            // let output_size_raw = #output_size.to_data().value;
-            let mut output_size = [16usize; 2];
+            let output_size_raw = #output_size.to_data().value;
+            let mut output_size = [0usize; 2];
 
-            // for (i, &x) in output_size_raw.iter().rev().take(2).rev().enumerate() {
-            //     output_size[i] = x.elem::<i64>() as usize;
-            // }
+            for (i, &x) in output_size_raw.iter().rev().take(2).rev().enumerate() {
+                output_size[i] = x.elem::<i64>() as usize;
+            }
 
             let #output = interpolate(
                 #input,

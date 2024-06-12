@@ -50,8 +50,11 @@ impl Scope {
                 }
             }
         } else {
-
-            panic!("No variable with name {}, node_position: {}", tensor.name, node_position);
+            self.variables.insert(
+                tensor.name.clone(),
+                vec![TensorVariable::new(1, node_position)],
+            );
+            // panic!("No variable with name {}, node_position: {}", tensor.name, node_position);
         }
     }
 
