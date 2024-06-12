@@ -50,7 +50,8 @@ impl Scope {
                 }
             }
         } else {
-            panic!("No variable with name {}", tensor.name);
+
+            panic!("No variable with name {}, node_position: {}", tensor.name, node_position);
         }
     }
 

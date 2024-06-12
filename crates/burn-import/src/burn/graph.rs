@@ -295,6 +295,7 @@ impl<PS: PrecisionSettings> BurnGraph<PS> {
         }
 
         // Register graph tensor input with 0 as node position
+        println!("graph_input_types: {:?}", self.graph_input_types);
         self.graph_input_types
             .clone()
             .into_iter()
