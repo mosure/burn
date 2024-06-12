@@ -328,6 +328,8 @@ impl<PS: PrecisionSettings> BurnGraph<PS> {
                             .tensor_register_future_use(&tensor, node_position)
                     })
             });
+
+        println!("SCOPE HAS BEEN BUILT");
     }
 
     fn register_record_file(&mut self, file: PathBuf, recorder_str: &str) {

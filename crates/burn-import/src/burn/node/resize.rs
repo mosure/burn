@@ -55,6 +55,8 @@ impl<PS: PrecisionSettings> NodeCodegen<PS> for ResizeNode {
     }
 
     fn input_types(&self) -> Vec<Type> {
+        println!("RESIZE INPUT TYPES: {:?}", vec![self.input.clone(), self.output_size.clone()]);
+
         vec![
             Type::Tensor(self.input.clone()),
             Type::Tensor(self.output_size.clone()),
