@@ -325,6 +325,7 @@ impl<PS: PrecisionSettings> BurnGraph<PS> {
                     .into_iter()
                     .flat_map(to_tensor)
                     .for_each(|tensor| {
+                        println!("REGISTERING FUTURE USE: {:?}", tensor.name);
                         self.scope
                             .tensor_register_future_use(&tensor, node_position)
                     })
