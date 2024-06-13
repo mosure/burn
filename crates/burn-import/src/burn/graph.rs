@@ -324,6 +324,17 @@ impl<PS: PrecisionSettings> BurnGraph<PS> {
                     .into_iter()
                     .flat_map(to_tensor)
                     .for_each(|tensor| {
+                        let is_input = self.graph_input_types.iter().any(|input| input.name() == &tensor.name);
+                        if !is_input {
+                            self.scope
+                                .tensor_register_variable(&tensor, 0)
+                        }
+                    });
+
+                node.input_types()
+                    .into_iter()
+                    .flat_map(to_tensor)
+                    .for_each(|tensor| {
                         self.scope
                             .tensor_register_future_use(&tensor, node_position)
                     })

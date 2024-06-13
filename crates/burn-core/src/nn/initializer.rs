@@ -1,9 +1,9 @@
 use burn_tensor::Shape;
 
 use crate::config::Config;
-use crate::module::{Param, ParamId};
+use crate::module::{Param, Parameter, ParamId};
 use crate::tensor::backend::Backend;
-use crate::tensor::{Distribution, Tensor};
+use crate::tensor::{Distribution, Element, Numeric, Tensor, TensorKind};
 
 use crate as burn;
 
@@ -76,11 +76,18 @@ impl Initializer {
     /// # Params
     ///
     /// - shape: Shape of the initiated tensor.
-    pub fn init<B: Backend, const D: usize, S: Into<Shape<D>>>(
+    pub fn init<B, const D: usize, K, S>(
         &self,
         shape: S,
-        device: &B::Device,
-    ) -> Param<Tensor<B, D>> {
+        device: &B::Device
+    ) -> Param<Tensor<B, D, K>>
+    where
+        B: Backend,
+        K: Numeric<B>,
+        K::Elem: Element,
+        S: Into<Shape<D>>,
+        Tensor<B, D, K>: Parameter<Device = B::Device>,
+    {
         self.init_with(shape, None, None, device)
     }
 
@@ -89,25 +96,34 @@ impl Initializer {
     /// # Params
     ///
     /// - shape: Shape of the initiated tensor.
-    pub fn init_with<B: Backend, const D: usize, S: Into<Shape<D>>>(
+    pub fn init_with<B, const D: usize, K, S>(
         &self,
         shape: S,
         fan_in: Option<usize>,
         fan_out: Option<usize>,
         device: &B::Device,
-    ) -> Param<Tensor<B, D>> {
+    ) -> Param<Tensor<B, D, K>>
+    where
+        B: Backend,
+        K: Numeric<B>,
+        K::Elem: Element,
+        S: Into<Shape<D>>,
+        Tensor<B, D, K>: Parameter<Device = B::Device>,
+    {
         let device = device.clone();
         let shape: Shape<D> = shape.into();
         let config = self.clone();
 
+        // this requires the passed device to have type, `T::Device` -> where T is `<Tensor<B, D, K> as Parameter>::Device`
         Param::uninitialized(
             ParamId::new(),
             move |device, require_grad| {
                 let mut tensor = config.init_tensor(shape.clone(), fan_in, fan_out, device);
 
-                if require_grad {
-                    tensor = tensor.require_grad();
-                }
+                // TODO: not sure how to separate Float require_grad and generic K
+                // if require_grad {
+                //     tensor = tensor.require_grad();
+                // }
 
                 tensor
             },
@@ -116,36 +132,26 @@ impl Initializer {
         )
     }
 
-    fn init_tensor<B: Backend, const D: usize, S: Into<Shape<D>>>(
+    fn init_tensor<B, const D: usize, K, S>(
         &self,
         shape: S,
         fan_in: Option<usize>,
         fan_out: Option<usize>,
         device: &B::Device,
-    ) -> Tensor<B, D> {
+    ) -> Tensor<B, D, K>
+    where
+        B: Backend,
+        K: Numeric<B>,
+        K::Elem: Element,
+        S: Into<Shape<D>>,
+        Tensor<B, D, K>: Parameter<Device = B::Device>,
+    {
         let shape = shape.into();
         match self {
-            Initializer::Constant { value } => Tensor::<B, D>::full(shape, *value, device),
-            Initializer::Ones => Tensor::<B, D>::ones(shape, device),
-            Initializer::Zeros => Tensor::<B, D>::zeros(shape, device),
-            Initializer::Uniform { min, max } => uniform_draw(shape, *min, *max, device),
-            Initializer::Normal { mean, std } => normal_draw(shape, *mean, *std, device),
-            Initializer::KaimingUniform { gain, fan_out_only } => {
-                let a = 3.0f64.sqrt() * *gain * self.kaiming_std(*fan_out_only, fan_in, fan_out);
-                uniform_draw(shape, -a, a, device)
-            }
-            Initializer::KaimingNormal { gain, fan_out_only } => {
-                let std = *gain * self.kaiming_std(*fan_out_only, fan_in, fan_out);
-                normal_draw(shape, 0.0, std, device)
-            }
-            Initializer::XavierUniform { gain } => {
-                let a = 3.0f64.sqrt() * *gain * self.xavier_std(fan_in, fan_out);
-                uniform_draw(shape, -a, a, device)
-            }
-            Initializer::XavierNormal { gain } => {
-                let std = *gain * self.xavier_std(fan_in, fan_out);
-                normal_draw(shape, 0.0, std, device)
-            }
+            Initializer::Constant { value } => Tensor::<B, D, K>::full(shape, *value, device),
+            Initializer::Ones => Tensor::<B, D, K>::ones(shape, device),
+            Initializer::Zeros => Tensor::<B, D, K>::zeros(shape, device),
+            _ => panic!("Initializer not supported for this type of tensor."),
         }
     }
 
